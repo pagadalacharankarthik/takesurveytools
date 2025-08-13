@@ -13,6 +13,7 @@ import { Trash2, Plus, Edit3, Save, X, GripVertical } from "lucide-react"
 import type { Survey, Question } from "@/lib/demo-data"
 import { generateQuestionId } from "@/lib/survey-storage"
 import { useAuth } from "@/hooks/use-auth"
+import { useLanguage } from "@/hooks/use-language"
 
 interface SurveyEditorProps {
   survey?: Survey
@@ -22,6 +23,7 @@ interface SurveyEditorProps {
 
 export function SurveyEditor({ survey, onSave, onCancel }: SurveyEditorProps) {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [title, setTitle] = useState(survey?.title || "")
   const [questions, setQuestions] = useState<Question[]>(survey?.questions || [])
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -105,16 +107,16 @@ export function SurveyEditor({ survey, onSave, onCancel }: SurveyEditorProps) {
       {/* Survey Details */}
       <Card>
         <CardHeader>
-          <CardTitle>Survey Details</CardTitle>
+          <CardTitle>{t("surveyDetails")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="survey-title">Survey Title</Label>
+            <Label htmlFor="survey-title">{t("surveyTitle")}</Label>
             <Input
               id="survey-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter survey title..."
+              placeholder={`${t("surveyTitle")}...`}
             />
           </div>
 
@@ -140,7 +142,7 @@ export function SurveyEditor({ survey, onSave, onCancel }: SurveyEditorProps) {
                 onKeyPress={(e) => e.key === "Enter" && handleAddKeyword()}
               />
               <Button type="button" onClick={handleAddKeyword}>
-                Add
+                {t("add")}
               </Button>
             </div>
           </div>
@@ -150,7 +152,9 @@ export function SurveyEditor({ survey, onSave, onCancel }: SurveyEditorProps) {
       {/* Questions Editor */}
       <Card>
         <CardHeader>
-          <CardTitle>Questions ({questions.length})</CardTitle>
+          <CardTitle>
+            {t("questions")} ({questions.length})
+          </CardTitle>
           <CardDescription>Create and manage survey questions</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -159,7 +163,7 @@ export function SurveyEditor({ survey, onSave, onCancel }: SurveyEditorProps) {
               {editingId === question.id ? (
                 <div className="space-y-4">
                   <div>
-                    <Label>Question Text</Label>
+                    <Label>{t("questionText")}</Label>
                     <Textarea
                       value={editingQuestion.text || ""}
                       onChange={(e) => setEditingQuestion((prev) => ({ ...prev, text: e.target.value }))}
@@ -167,7 +171,7 @@ export function SurveyEditor({ survey, onSave, onCancel }: SurveyEditorProps) {
                     />
                   </div>
                   <div>
-                    <Label>Question Type</Label>
+                    <Label>{t("questionType")}</Label>
                     <Select
                       value={editingQuestion.type || question.type}
                       onValueChange={(value) =>
@@ -178,10 +182,10 @@ export function SurveyEditor({ survey, onSave, onCancel }: SurveyEditorProps) {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="text">Text Response</SelectItem>
-                        <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
-                        <SelectItem value="rating">Rating Scale</SelectItem>
-                        <SelectItem value="yes_no">Yes/No</SelectItem>
+                        <SelectItem value="text">{t("textInput")}</SelectItem>
+                        <SelectItem value="multiple_choice">{t("multipleChoice")}</SelectItem>
+                        <SelectItem value="rating">{t("rating")}</SelectItem>
+                        <SelectItem value="yes_no">{t("yesNo")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -204,11 +208,11 @@ export function SurveyEditor({ survey, onSave, onCancel }: SurveyEditorProps) {
                   <div className="flex gap-2">
                     <Button size="sm" onClick={handleSaveEdit}>
                       <Save className="h-4 w-4 mr-1" />
-                      Save
+                      {t("save")}
                     </Button>
                     <Button size="sm" variant="outline" onClick={handleCancelEdit}>
                       <X className="h-4 w-4 mr-1" />
-                      Cancel
+                      {t("cancel")}
                     </Button>
                   </div>
                 </div>
@@ -260,7 +264,7 @@ export function SurveyEditor({ survey, onSave, onCancel }: SurveyEditorProps) {
 
           <Button variant="outline" onClick={handleAddQuestion} className="w-full bg-transparent">
             <Plus className="h-4 w-4 mr-2" />
-            Add Question
+            {t("addQuestion")}
           </Button>
         </CardContent>
       </Card>
@@ -268,10 +272,10 @@ export function SurveyEditor({ survey, onSave, onCancel }: SurveyEditorProps) {
       {/* Save Actions */}
       <div className="flex justify-end gap-4">
         <Button variant="outline" onClick={onCancel}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button onClick={handleSave} disabled={!title.trim() || questions.length === 0}>
-          {survey ? "Update Survey" : "Create Survey"}
+          {survey ? t("updateSurvey") : t("createSurvey")}
         </Button>
       </div>
 

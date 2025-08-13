@@ -26,6 +26,7 @@ import type { AIExtractionResult } from "@/lib/ai-simulation"
 import type { ParsedContent } from "@/lib/file-parser"
 import { useAuth } from "@/hooks/use-auth"
 import { getStoredSurveys, saveSurvey, deleteSurvey } from "@/lib/survey-storage"
+import { useLanguage } from "@/hooks/use-language"
 
 // Demo conductors for assignment
 const DEMO_CONDUCTORS = [
@@ -58,6 +59,7 @@ const DEMO_SURVEY_PROGRESS = [
 
 export function OrgAdminDashboard() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [selectedTab, setSelectedTab] = useState("overview")
   const [showUploadDialog, setShowUploadDialog] = useState(false)
   const [showSurveyEditor, setShowSurveyEditor] = useState(false)
@@ -208,18 +210,20 @@ export function OrgAdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Surveys</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalSurveys")}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{orgSurveys.length}</div>
-            <p className="text-xs text-muted-foreground">{activeSurveys.length} active</p>
+            <p className="text-xs text-muted-foreground">
+              {activeSurveys.length} {t("activeSurveys")}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Draft Surveys</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("draftSurveys")}</CardTitle>
             <Edit3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -230,7 +234,7 @@ export function OrgAdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Conductors</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("conductors")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -243,7 +247,7 @@ export function OrgAdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Responses</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalResponses")}</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -256,8 +260,8 @@ export function OrgAdminDashboard() {
       {/* Main Dashboard Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="surveys">My Surveys</TabsTrigger>
+          <TabsTrigger value="overview">{t("dashboard")}</TabsTrigger>
+          <TabsTrigger value="surveys">{t("surveys")}</TabsTrigger>
           <TabsTrigger value="progress">Progress Tracking</TabsTrigger>
         </TabsList>
 
@@ -265,7 +269,7 @@ export function OrgAdminDashboard() {
           {/* Quick Actions */}
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle>{t("quickActions")}</CardTitle>
               <CardDescription>Get started with common tasks</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-4">
@@ -273,12 +277,12 @@ export function OrgAdminDashboard() {
                 <DialogTrigger asChild>
                   <Button>
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload Survey Document
+                    {t("uploadDocument")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Upload Survey Document</DialogTitle>
+                    <DialogTitle>{t("uploadDocument")}</DialogTitle>
                     <DialogDescription>
                       Upload a PDF, DOCX, or TXT file to extract survey questions using AI
                     </DialogDescription>
@@ -289,12 +293,12 @@ export function OrgAdminDashboard() {
 
               <Button variant="outline" onClick={handleManageConductors}>
                 <Users className="h-4 w-4 mr-2" />
-                Manage Conductors
+                {t("manageConductors")}
               </Button>
 
               <Button variant="outline" onClick={handleViewAnalytics}>
                 <BarChart3 className="h-4 w-4 mr-2" />
-                View Analytics
+                {t("viewAnalytics")}
               </Button>
             </CardContent>
           </Card>
@@ -302,7 +306,7 @@ export function OrgAdminDashboard() {
           {/* Recent Activity */}
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle>{t("recentActivity")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="text-sm">
@@ -323,13 +327,15 @@ export function OrgAdminDashboard() {
 
         <TabsContent value="surveys" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">My Surveys ({orgSurveys.length})</h3>
+            <h3 className="text-lg font-semibold">
+              {t("surveys")} ({orgSurveys.length})
+            </h3>
             <div className="flex gap-2">
               <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
                 <DialogTrigger asChild>
                   <Button variant="outline">
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload & Extract
+                    {t("uploadDocument")} & {t("extractQuestions")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -343,7 +349,7 @@ export function OrgAdminDashboard() {
 
               <Button onClick={handleCreateSurvey}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Survey
+                {t("createSurvey")}
               </Button>
             </div>
           </div>
@@ -384,22 +390,22 @@ export function OrgAdminDashboard() {
                   <div className="flex gap-2 flex-wrap">
                     <Button size="sm" variant="outline" onClick={() => handlePreviewSurvey(survey)}>
                       <Eye className="h-4 w-4 mr-1" />
-                      Preview
+                      {t("previewSurvey")}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => handleEditSurvey(survey)}>
                       <Edit3 className="h-4 w-4 mr-1" />
-                      Edit Survey
+                      {t("editSurvey")}
                     </Button>
                     {survey.status === "draft" && (
                       <>
                         <Button size="sm" onClick={() => handlePublishSurvey(survey.id)}>
-                          Publish
+                          {t("publishSurvey")}
                         </Button>
                         <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
                           <DialogTrigger asChild>
                             <Button size="sm" variant="outline" onClick={() => setSelectedSurvey(survey)}>
                               <UserPlus className="h-4 w-4 mr-1" />
-                              Assign
+                              {t("assignSurvey")}
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
@@ -421,7 +427,7 @@ export function OrgAdminDashboard() {
                       className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
+                      {t("delete")}
                     </Button>
                   </div>
                 </CardContent>
@@ -490,7 +496,7 @@ export function OrgAdminDashboard() {
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" onClick={() => handleViewResponses(survey)}>
                         <Eye className="h-4 w-4 mr-1" />
-                        View Responses
+                        {t("viewResponses")}
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => handleContactConductor(survey)}>
                         Contact Conductor

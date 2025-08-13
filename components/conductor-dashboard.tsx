@@ -23,6 +23,7 @@ import { DEMO_SURVEYS, type Survey } from "@/lib/demo-data"
 import { getResponsesBySurvey, getPendingResponsesCount, markResponsesSynced } from "@/lib/survey-responses"
 import { getStoredSurveys, saveSurvey } from "@/lib/survey-storage"
 import { useAuth } from "@/hooks/use-auth"
+import { useLanguage } from "@/hooks/use-language"
 
 // Demo assigned surveys for the conductor
 const DEMO_ASSIGNED_SURVEYS = [
@@ -46,6 +47,7 @@ const DEMO_ASSIGNED_SURVEYS = [
 
 export function ConductorDashboard() {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [selectedTab, setSelectedTab] = useState("assigned")
   const [selectedSurvey, setSelectedSurvey] = useState<Survey | null>(null)
   const [showSurveyForm, setShowSurveyForm] = useState(false)
@@ -185,7 +187,7 @@ export function ConductorDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assigned Surveys</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("assignedSurveys")}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -196,7 +198,7 @@ export function ConductorDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Responses Collected</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalResponses")}</CardTitle>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -251,13 +253,13 @@ export function ConductorDashboard() {
       {/* Main Dashboard Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="assigned">Assigned Surveys</TabsTrigger>
+          <TabsTrigger value="assigned">{t("assignedSurveys")}</TabsTrigger>
           <TabsTrigger value="responses">My Responses</TabsTrigger>
         </TabsList>
 
         <TabsContent value="assigned" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">My Assigned Surveys</h3>
+            <h3 className="text-lg font-semibold">{t("assignedSurveys")}</h3>
           </div>
 
           <div className="grid gap-4">
@@ -268,7 +270,7 @@ export function ConductorDashboard() {
                     <div>
                       <CardTitle className="text-lg">{assignment.survey?.title}</CardTitle>
                       <CardDescription>
-                        {assignment.survey?.questions.length} questions • Assigned {assignment.assignedDate}
+                        {assignment.survey?.questions.length} questions • {t("assigned")} {assignment.assignedDate}
                         <br />
                         <span className="flex items-center gap-1 mt-1">
                           <MapPin className="h-3 w-3" />
@@ -277,7 +279,9 @@ export function ConductorDashboard() {
                       </CardDescription>
                     </div>
                     <div className="flex flex-col gap-2">
-                      <Badge variant={getPriorityColor(assignment.priority)}>{assignment.priority} priority</Badge>
+                      <Badge variant={getPriorityColor(assignment.priority)}>
+                        {assignment.priority} {t("priority")}
+                      </Badge>
                       <Badge variant="outline">Due: {assignment.deadline}</Badge>
                     </div>
                   </div>
@@ -288,7 +292,7 @@ export function ConductorDashboard() {
                     <div>
                       <div className="flex justify-between text-sm mb-2">
                         <span>
-                          Progress: {assignment.responsesCollected}/{assignment.targetResponses}
+                          {t("progress")}: {assignment.responsesCollected}/{assignment.targetResponses}
                         </span>
                         <span>{assignment.completionPercentage}%</span>
                       </div>
@@ -317,12 +321,14 @@ export function ConductorDashboard() {
                         <DialogTrigger asChild>
                           <Button onClick={() => handleStartSurvey(assignment.survey!)}>
                             <Play className="h-4 w-4 mr-2" />
-                            Start Survey
+                            {t("startSurvey")}
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                           <DialogHeader>
-                            <DialogTitle>Conduct Survey: {selectedSurvey?.title}</DialogTitle>
+                            <DialogTitle>
+                              {t("conductSurvey")}: {selectedSurvey?.title}
+                            </DialogTitle>
                             <DialogDescription>Fill out this survey form with participant responses</DialogDescription>
                           </DialogHeader>
                           {selectedSurvey && (
@@ -337,12 +343,12 @@ export function ConductorDashboard() {
 
                       <Button variant="outline" size="sm" onClick={() => handlePreviewSurvey(assignment.survey!)}>
                         <Eye className="h-4 w-4 mr-1" />
-                        Preview Questions
+                        {t("previewSurvey")}
                       </Button>
 
                       <Button variant="outline" size="sm" onClick={() => handleEditSurvey(assignment.survey!)}>
                         <Edit3 className="h-4 w-4 mr-1" />
-                        Edit Survey
+                        {t("editSurvey")}
                       </Button>
                     </div>
                   </div>
@@ -375,7 +381,7 @@ export function ConductorDashboard() {
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span className="font-medium">Total Responses:</span> {responses.length}
+                        <span className="font-medium">{t("totalResponses")}:</span> {responses.length}
                       </div>
                       <div>
                         <span className="font-medium">Synced:</span>{" "}
@@ -395,7 +401,7 @@ export function ConductorDashboard() {
                           onClick={() => handleViewResponses(assignment.surveyId, assignment.survey?.title || "")}
                         >
                           <Eye className="h-4 w-4 mr-1" />
-                          View All Responses
+                          {t("viewResponses")}
                         </Button>
                       </div>
                     )}
@@ -411,7 +417,7 @@ export function ConductorDashboard() {
       <Dialog open={showSurveyEditor} onOpenChange={setShowSurveyEditor}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Survey</DialogTitle>
+            <DialogTitle>{t("editSurvey")}</DialogTitle>
             <DialogDescription>Modify survey questions and settings</DialogDescription>
           </DialogHeader>
           {editingSurvey && (

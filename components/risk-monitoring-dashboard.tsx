@@ -11,8 +11,10 @@ import { RiskMap } from "@/components/risk-map"
 import { RiskInvestigationDialog, RiskDetailsDialog } from "@/components/risk-investigation-dialogs"
 import { generateDemoRiskAlerts, analyzeResponseRisks, type RiskAlert } from "@/lib/risk-detection"
 import { getStoredResponses } from "@/lib/survey-responses"
+import { useLanguage } from "@/hooks/use-language"
 
 export function RiskMonitoringDashboard() {
+  const { t } = useLanguage()
   const [selectedTab, setSelectedTab] = useState("overview")
   const [riskAlerts, setRiskAlerts] = useState<RiskAlert[]>([])
   const [realTimeAlerts, setRealTimeAlerts] = useState<RiskAlert[]>([])
@@ -156,7 +158,7 @@ export function RiskMonitoringDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">High Priority</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("high")} Priority</CardTitle>
             <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -178,12 +180,12 @@ export function RiskMonitoringDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Risk Score</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("riskLevel")}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
-              {highPriorityAlerts.length > 0 ? "High" : activeAlerts.length > 2 ? "Medium" : "Low"}
+              {highPriorityAlerts.length > 0 ? t("high") : activeAlerts.length > 2 ? t("medium") : t("low")}
             </div>
             <p className="text-xs text-muted-foreground">Overall system risk</p>
           </CardContent>
@@ -194,16 +196,18 @@ export function RiskMonitoringDashboard() {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            <strong>{highPriorityAlerts.length} high priority alerts</strong> require immediate attention. Review the
-            alerts below and take appropriate action.
+            <strong>
+              {highPriorityAlerts.length} {t("high")} priority alerts
+            </strong>{" "}
+            require immediate attention. Review the alerts below and take appropriate action.
           </AlertDescription>
         </Alert>
       )}
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="map">Location Map</TabsTrigger>
+          <TabsTrigger value="overview">{t("dashboard")}</TabsTrigger>
+          <TabsTrigger value="map">{t("location")} Map</TabsTrigger>
           <TabsTrigger value="alerts">Alert Management</TabsTrigger>
         </TabsList>
 
@@ -227,7 +231,7 @@ export function RiskMonitoringDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={getSeverityColor(alert.severity)}>{alert.severity}</Badge>
+                    <Badge variant={getSeverityColor(alert.severity)}>{t(alert.severity as any)}</Badge>
                     <Badge variant={getStatusColor(alert.status)}>{alert.status}</Badge>
                   </div>
                 </div>
@@ -316,7 +320,7 @@ export function RiskMonitoringDashboard() {
                       </CardDescription>
                     </div>
                     <div className="flex gap-2">
-                      <Badge variant={getSeverityColor(alert.severity)}>{alert.severity}</Badge>
+                      <Badge variant={getSeverityColor(alert.severity)}>{t(alert.severity as any)}</Badge>
                       <Badge variant={getStatusColor(alert.status)}>{alert.status}</Badge>
                     </div>
                   </div>
@@ -335,15 +339,15 @@ export function RiskMonitoringDashboard() {
                     <div className="flex gap-2">
                       <Button size="sm" onClick={() => handleInvestigateAlert(alert)}>
                         <Eye className="h-4 w-4 mr-1" />
-                        Investigate
+                        {t("investigate")}
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => handleResolveAlert(alert.id)}>
                         <CheckCircle className="h-4 w-4 mr-1" />
-                        Mark Resolved
+                        {t("markResolved")}
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => handleViewDetails(alert)}>
                         <X className="h-4 w-4 mr-1" />
-                        View Details
+                        {t("viewDetails")}
                       </Button>
                     </div>
                   )}
@@ -351,11 +355,11 @@ export function RiskMonitoringDashboard() {
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" onClick={() => handleResolveAlert(alert.id)}>
                         <CheckCircle className="h-4 w-4 mr-1" />
-                        Mark Resolved
+                        {t("markResolved")}
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => handleViewDetails(alert)}>
                         <Eye className="h-4 w-4 mr-1" />
-                        View Details
+                        {t("viewDetails")}
                       </Button>
                     </div>
                   )}
@@ -363,7 +367,7 @@ export function RiskMonitoringDashboard() {
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" onClick={() => handleViewDetails(alert)}>
                         <Eye className="h-4 w-4 mr-1" />
-                        View Details
+                        {t("viewDetails")}
                       </Button>
                     </div>
                   )}

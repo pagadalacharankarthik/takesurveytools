@@ -4,6 +4,9 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { AuthProvider } from "@/hooks/use-auth"
+import { LanguageProvider } from "@/hooks/use-language"
+import { DataInitializer } from "@/components/data-initializer"
+import { ErrorBoundary } from "@/components/error-boundary"
 
 export const metadata: Metadata = {
   title: "TakeSurvey",
@@ -28,7 +31,14 @@ html {
         `}</style>
       </head>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        {/* Added error boundary and proper provider nesting */}
+        <ErrorBoundary>
+          <LanguageProvider>
+            <AuthProvider>
+              <DataInitializer>{children}</DataInitializer>
+            </AuthProvider>
+          </LanguageProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )

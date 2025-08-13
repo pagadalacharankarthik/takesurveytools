@@ -33,8 +33,10 @@ import {
 } from "lucide-react"
 import { getStoredOrganizations, type Organization } from "@/lib/organization-storage"
 import { DEMO_SURVEYS } from "@/lib/demo-data"
+import { useLanguage } from "@/hooks/use-language"
 
 export function SuperAdminDashboard() {
+  const { t } = useLanguage()
   const [selectedTab, setSelectedTab] = useState("overview")
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [showAddOrg, setShowAddOrg] = useState(false)
@@ -140,57 +142,59 @@ export function SuperAdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Organizations</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("organizations")}</CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{DEMO_STATS.totalOrganizations}</div>
-            <p className="text-xs text-muted-foreground">Active organizations</p>
+            <p className="text-xs text-muted-foreground">{t("activeOrganizations")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Surveys</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalSurveys")}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{DEMO_STATS.totalSurveys}</div>
-            <p className="text-xs text-muted-foreground">{DEMO_STATS.activeSurveys} currently active</p>
+            <p className="text-xs text-muted-foreground">
+              {DEMO_STATS.activeSurveys} {t("activeSurveys")}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Survey Conductors</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("conductors")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{DEMO_STATS.totalConductors}</div>
-            <p className="text-xs text-muted-foreground">Across all organizations</p>
+            <p className="text-xs text-muted-foreground">{t("acrossOrganizations")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Risk Alerts</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("riskMonitoring")}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">{DEMO_STATS.flaggedRisks}</div>
-            <p className="text-xs text-muted-foreground">Require attention</p>
+            <p className="text-xs text-muted-foreground">{t("requireAttention")}</p>
           </CardContent>
         </Card>
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="organizations">Organizations</TabsTrigger>
-          <TabsTrigger value="surveys">Surveys</TabsTrigger>
-          <TabsTrigger value="risks">Risk Monitor</TabsTrigger>
-          <TabsTrigger value="map">Risk Map</TabsTrigger>
+          <TabsTrigger value="overview">{t("dashboard")}</TabsTrigger>
+          <TabsTrigger value="analytics">{t("viewAnalytics")}</TabsTrigger>
+          <TabsTrigger value="organizations">{t("organizations")}</TabsTrigger>
+          <TabsTrigger value="surveys">{t("surveys")}</TabsTrigger>
+          <TabsTrigger value="risks">{t("riskMonitoring")}</TabsTrigger>
+          <TabsTrigger value="map">{t("riskMap")}</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -198,24 +202,24 @@ export function SuperAdminDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
-                  Performance Metrics
+                  {t("viewAnalytics")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Total Responses Collected</span>
+                  <span className="text-sm">{t("totalResponses")}</span>
                   <span className="font-bold">{DEMO_STATS.totalResponses.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Coverage Percentage</span>
+                  <span className="text-sm">{t("coveragePercentage")}</span>
                   <span className="font-bold text-green-600">{DEMO_STATS.coveragePercentage}%</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Avg Response Time</span>
+                  <span className="text-sm">{t("avgResponseTime")}</span>
                   <span className="font-bold">{DEMO_STATS.avgResponseTime}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm">Active Surveys</span>
+                  <span className="text-sm">{t("activeSurveys")}</span>
                   <span className="font-bold">{DEMO_STATS.activeSurveys}</span>
                 </div>
               </CardContent>
@@ -225,31 +229,30 @@ export function SuperAdminDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5" />
-                  Recent Activity
+                  {t("recentActivity")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="text-sm">
-                  <div className="font-medium">New survey created</div>
+                  <div className="font-medium">{t("createSurvey")}</div>
                   <div className="text-muted-foreground">Health & Education Initiative - 2 hours ago</div>
                 </div>
                 <div className="text-sm">
-                  <div className="font-medium">Risk alert triggered</div>
+                  <div className="font-medium">{t("riskAlertTriggered")}</div>
                   <div className="text-muted-foreground">Duplicate responses detected - 4 hours ago</div>
                 </div>
                 <div className="text-sm">
-                  <div className="font-medium">Survey completed</div>
+                  <div className="font-medium">{t("surveyCompleted")}</div>
                   <div className="text-muted-foreground">Water Access Assessment - 1 day ago</div>
                 </div>
                 <div className="text-sm">
-                  <div className="font-medium">New conductor assigned</div>
+                  <div className="font-medium">{t("newConductorAssigned")}</div>
                   <div className="text-muted-foreground">Rural Development Foundation - 2 days ago</div>
                 </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
-        {/* Added new Analytics tab with comprehensive charts */}
         <TabsContent value="analytics" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <SurveyProgressChart />
@@ -263,15 +266,17 @@ export function SuperAdminDashboard() {
         </TabsContent>
         <TabsContent value="organizations" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Organizations ({organizations.length})</h3>
+            <h3 className="text-lg font-semibold">
+              {t("organizations")} ({organizations.length})
+            </h3>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setShowConductorManagement(true)}>
                 <Users className="h-4 w-4 mr-2" />
-                Manage Conductors
+                {t("manageConductors")}
               </Button>
               <Button onClick={() => setShowAddOrg(true)}>
                 <Building2 className="h-4 w-4 mr-2" />
-                Add Organization
+                {t("addOrganization")}
               </Button>
             </div>
           </div>
@@ -291,23 +296,23 @@ export function SuperAdminDashboard() {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
-                      <span className="font-medium">Created:</span> {org.createdAt}
+                      <span className="font-medium">{t("created")}</span> {org.createdAt}
                     </div>
                     <div>
-                      <span className="font-medium">Surveys:</span> {org.totalSurveys}
+                      <span className="font-medium">{t("surveys")}</span> {org.totalSurveys}
                     </div>
                     <div>
-                      <span className="font-medium">Users:</span> {org.adminUsers.length + org.conductors.length}
+                      <span className="font-medium">{t("users")}</span> {org.adminUsers.length + org.conductors.length}
                     </div>
                   </div>
                   <div className="flex gap-2 mt-4">
                     <Button size="sm" variant="outline" onClick={() => handleViewDetails(org)}>
                       <Eye className="h-4 w-4 mr-1" />
-                      View Details
+                      {t("viewDetails")}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => handleViewDetails(org)}>
                       <UserPlus className="h-4 w-4 mr-1" />
-                      Manage Users
+                      {t("manageUsers")}
                     </Button>
                   </div>
                 </CardContent>
@@ -317,7 +322,7 @@ export function SuperAdminDashboard() {
         </TabsContent>
         <TabsContent value="surveys" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Survey Assignments</h3>
+            <h3 className="text-lg font-semibold">{t("surveys")}</h3>
           </div>
 
           <div className="grid gap-4">
@@ -328,7 +333,7 @@ export function SuperAdminDashboard() {
                     <div>
                       <CardTitle className="text-lg">{survey.title}</CardTitle>
                       <CardDescription>
-                        {survey.organizationName} • Assigned to {survey.conductorName}
+                        {survey.organizationName} • {t("assignedTo")} {survey.conductorName}
                       </CardDescription>
                     </div>
                     <Badge variant={getStatusColor(survey.status)}>{survey.status}</Badge>
@@ -337,14 +342,14 @@ export function SuperAdminDashboard() {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                     <div>
-                      <span className="font-medium">Assigned:</span> {survey.assignedDate}
+                      <span className="font-medium">{t("assigned")}</span> {survey.assignedDate}
                     </div>
                     <div>
-                      <span className="font-medium">Progress:</span> {survey.responsesCollected}/
+                      <span className="font-medium">{t("progress")}</span> {survey.responsesCollected}/
                       {survey.targetResponses}
                     </div>
                     <div>
-                      <span className="font-medium">Completion:</span>{" "}
+                      <span className="font-medium">{t("completion")}</span>{" "}
                       {Math.round((survey.responsesCollected / survey.targetResponses) * 100)}%
                     </div>
                     <div className="flex items-center gap-1">
@@ -359,11 +364,11 @@ export function SuperAdminDashboard() {
                   <div className="flex gap-2 mt-4">
                     <Button size="sm" variant="outline" onClick={() => handleViewResponses(survey.id, survey.title)}>
                       <Eye className="h-4 w-4 mr-1" />
-                      View Responses
+                      {t("viewResponses")}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => handleViewLocations(survey.id, survey.title)}>
                       <MapPin className="h-4 w-4 mr-1" />
-                      View Locations
+                      {t("viewLocations")}
                     </Button>
                   </div>
                 </CardContent>
@@ -373,15 +378,15 @@ export function SuperAdminDashboard() {
         </TabsContent>
         <TabsContent value="risks" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Risk Monitoring & Alerts</h3>
-            <Badge variant="destructive">3 Active Alerts</Badge>
+            <h3 className="text-lg font-semibold">{t("riskMonitoring")}</h3>
+            <Badge variant="destructive">
+              {DEMO_STATS.flaggedRisks} {t("activeAlerts")}
+            </Badge>
           </div>
 
           <Alert>
             <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Automated risk detection is active. Review flagged items below and take appropriate action.
-            </AlertDescription>
+            <AlertDescription>{t("automatedRiskDetection")}</AlertDescription>
           </Alert>
 
           <div className="grid gap-4">
@@ -392,9 +397,7 @@ export function SuperAdminDashboard() {
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="h-5 w-5 mt-0.5 text-red-500" />
                       <div>
-                        <CardTitle className="text-base">
-                          Multiple responses detected from same device in Water Access Survey
-                        </CardTitle>
+                        <CardTitle className="text-base">{t("multipleResponsesDetected")}</CardTitle>
                         <CardDescription className="flex items-center gap-4 mt-1">
                           <span className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
@@ -407,23 +410,23 @@ export function SuperAdminDashboard() {
                         </CardDescription>
                       </div>
                     </div>
-                    <Badge variant="destructive">high priority</Badge>
+                    <Badge variant="destructive">{t("highPriority")}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => handleInvestigateRisk({ id: 1, type: "duplicate_device" })}>
-                      Investigate
+                      {t("investigate")}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => handleMarkRiskResolved({ id: 1 })}>
-                      Mark Resolved
+                      {t("markResolved")}
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => handleViewRiskDetails({ id: 1, type: "duplicate_device" })}
                     >
-                      View Details
+                      {t("viewDetails")}
                     </Button>
                   </div>
                 </CardContent>
