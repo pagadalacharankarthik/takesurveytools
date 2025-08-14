@@ -3,12 +3,13 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Clock, Save, Send } from "lucide-react"
+import { MapPin, Clock, Save, Send, User } from "lucide-react"
 import type { Survey, Question } from "@/lib/demo-data"
 import { saveResponse, generateDeviceId } from "@/lib/survey-responses"
 
@@ -18,8 +19,21 @@ interface SurveyFormProps {
   onComplete: () => void
 }
 
+interface PersonalInfo {
+  name: string
+  email: string
+  mobile: string
+  aadhar: string
+}
+
 export function SurveyForm({ survey, conductorId, onComplete }: SurveyFormProps) {
   const [responses, setResponses] = useState<{ [questionId: string]: string | string[] }>({})
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    name: "",
+    email: "",
+    mobile: "",
+    aadhar: "",
+  })
   const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [startTime] = useState(Date.now())
@@ -28,6 +42,13 @@ export function SurveyForm({ survey, conductorId, onComplete }: SurveyFormProps)
     setResponses((prev) => ({
       ...prev,
       [questionId]: value,
+    }))
+  }
+
+  const handlePersonalInfoChange = (field: keyof PersonalInfo, value: string) => {
+    setPersonalInfo((prev) => ({
+      ...prev,
+      [field]: value,
     }))
   }
 
@@ -58,10 +79,10 @@ export function SurveyForm({ survey, conductorId, onComplete }: SurveyFormProps)
     // Calculate response time
     const responseTime = Date.now() - startTime
 
-    // Save response locally
     const responseId = saveResponse({
       surveyId: survey.id,
       conductorId,
+      personalInfo, // Add personal information to response
       responses,
       location: currentLocation || undefined,
       deviceInfo: {
@@ -173,6 +194,7 @@ export function SurveyForm({ survey, conductorId, onComplete }: SurveyFormProps)
   }).length
 
   const progressPercentage = Math.round((completedQuestions / survey.questions.length) * 100)
+  const isPersonalInfoComplete = personalInfo.name && personalInfo.email && personalInfo.mobile && personalInfo.aadhar
 
   return (
     <div className="space-y-6">
@@ -212,6 +234,62 @@ export function SurveyForm({ survey, conductorId, onComplete }: SurveyFormProps)
         </div>
       </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Participant Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name *</Label>
+              <Input
+                id="name"
+                value={personalInfo.name}
+                onChange={(e) => handlePersonalInfoChange("name", e.target.value)}
+                placeholder="Enter participant's full name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={personalInfo.email}
+                onChange={(e) => handlePersonalInfoChange("email", e.target.value)}
+                placeholder="Enter participant's email"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="mobile">Mobile Number *</Label>
+              <Input
+                id="mobile"
+                type="tel"
+                value={personalInfo.mobile}
+                onChange={(e) => handlePersonalInfoChange("mobile", e.target.value)}
+                placeholder="Enter participant's mobile number"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="aadhar">Aadhar Number *</Label>
+              <Input
+                id="aadhar"
+                value={personalInfo.aadhar}
+                onChange={(e) => handlePersonalInfoChange("aadhar", e.target.value)}
+                placeholder="Enter participant's Aadhar number"
+                maxLength={12}
+                required
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Questions */}
       <div className="space-y-4">{survey.questions.map((question, index) => renderQuestion(question, index))}</div>
 
@@ -219,7 +297,8 @@ export function SurveyForm({ survey, conductorId, onComplete }: SurveyFormProps)
       <div className="space-y-4">
         <Alert>
           <AlertDescription>
-            Response will be saved locally and synced when online. Make sure to capture location for accurate data.
+            Response will be saved locally and synced when online. Make sure to capture location and fill all personal
+            information for accurate data.
           </AlertDescription>
         </Alert>
 
@@ -228,7 +307,7 @@ export function SurveyForm({ survey, conductorId, onComplete }: SurveyFormProps)
             <Save className="h-4 w-4 mr-2" />
             Save Draft
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || completedQuestions === 0}>
+          <Button onClick={handleSubmit} disabled={isSubmitting || completedQuestions === 0 || !isPersonalInfoComplete}>
             <Send className="h-4 w-4 mr-2" />
             {isSubmitting ? "Submitting..." : "Submit Response"}
           </Button>

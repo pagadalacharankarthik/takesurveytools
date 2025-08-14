@@ -1,9 +1,17 @@
 // Local storage management for survey responses
+export interface PersonalInfo {
+  name: string
+  email: string
+  mobile: string
+  aadhar: string
+}
+
 export interface SurveyResponse {
   id: string
   surveyId: string
   conductorId?: string
   conductorName?: string
+  personalInfo?: PersonalInfo // Added personal information field
   responses: { question: string; answer: string }[] | { [questionId: string]: string | string[] }
   location?: {
     latitude: number

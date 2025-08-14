@@ -62,6 +62,7 @@ export function ConductorDashboard() {
     id: string
     title: string
   } | null>(null)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   useEffect(() => {
     setPendingCount(getPendingResponsesCount())
@@ -78,11 +79,21 @@ export function ConductorDashboard() {
     window.addEventListener("online", handleOnline)
     window.addEventListener("offline", handleOffline)
 
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "survey_responses") {
+        setPendingCount(getPendingResponsesCount())
+        setRefreshTrigger((prev) => prev + 1)
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+
     return () => {
       window.removeEventListener("online", handleOnline)
       window.removeEventListener("offline", handleOffline)
+      window.removeEventListener("storage", handleStorageChange)
     }
-  }, [])
+  }, [refreshTrigger])
 
   const assignedSurveys = DEMO_ASSIGNED_SURVEYS.map((assignment) => {
     const survey = allSurveys.find((s) => s.id === assignment.surveyId)

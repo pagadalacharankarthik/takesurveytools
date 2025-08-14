@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { LanguageSelector } from "@/components/language-selector"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { AIChatbot } from "@/components/ai-chatbot"
 import { LogOut, BarChart3 } from "lucide-react"
 import Link from "next/link"
@@ -49,6 +50,7 @@ export function DashboardLayout({ children, title }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <LanguageSelector />
 
             <DropdownMenu>

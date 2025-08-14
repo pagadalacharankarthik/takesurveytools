@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { MapPin, Clock, FileText, Download, Eye } from "lucide-react"
-import { getResponsesBySurvey } from "@/lib/survey-responses"
+import { MapPin, Clock, FileText, Download, Eye, User, Mail, Phone } from "lucide-react"
+import { getResponsesBySurvey, type SurveyResponse } from "@/lib/survey-responses"
 
 interface ConductorResponseViewerProps {
   surveyId: string
@@ -21,15 +21,18 @@ export function ConductorResponseViewer({ surveyId, surveyTitle, open, onOpenCha
 
   const exportResponses = () => {
     const csvContent = responses
-      .map(
-        (response) =>
-          `${response.id},${response.conductorName},${response.location.address},${response.submittedAt},${response.responses.length},${response.syncStatus}`,
-      )
+      .map((response) => {
+        const personalInfo = response.personalInfo
+        return `${response.id},${personalInfo?.name || "N/A"},${personalInfo?.email || "N/A"},${personalInfo?.mobile || "N/A"},${personalInfo?.aadhar || "N/A"},${response.conductorName},${response.location?.address || "Unknown"},${response.submittedAt},${Array.isArray(response.responses) ? response.responses.length : Object.keys(response.responses).length},${response.syncStatus}`
+      })
       .join("\n")
 
-    const blob = new Blob([`ID,Conductor,Location,Submitted,Questions Answered,Sync Status\n${csvContent}`], {
-      type: "text/csv",
-    })
+    const blob = new Blob(
+      [`ID,Name,Email,Mobile,Aadhar,Conductor,Location,Submitted,Questions Answered,Sync Status\n${csvContent}`],
+      {
+        type: "text/csv",
+      },
+    )
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
@@ -37,22 +40,40 @@ export function ConductorResponseViewer({ surveyId, surveyTitle, open, onOpenCha
     a.click()
   }
 
-  const viewResponseDetails = (response: any) => {
-    // Create a detailed view of the response
+  const viewResponseDetails = (response: SurveyResponse) => {
     const detailWindow = window.open("", "_blank", "width=800,height=600")
     if (detailWindow) {
+      const personalInfo = response.personalInfo
+      const responsesArray = Array.isArray(response.responses)
+        ? response.responses
+        : Object.entries(response.responses as any).map(([question, answer]) => ({
+            question,
+            answer: Array.isArray(answer) ? answer.join(", ") : String(answer),
+          }))
+
       detailWindow.document.write(`
         <html>
           <head><title>Response Details - ${response.id}</title></head>
           <body style="font-family: Arial, sans-serif; padding: 20px;">
             <h2>Response Details</h2>
             <p><strong>Response ID:</strong> ${response.id}</p>
+            ${
+              personalInfo
+                ? `
+              <h3>Personal Information:</h3>
+              <p><strong>Name:</strong> ${personalInfo.name}</p>
+              <p><strong>Email:</strong> ${personalInfo.email}</p>
+              <p><strong>Mobile:</strong> ${personalInfo.mobile}</p>
+              <p><strong>Aadhar:</strong> ${personalInfo.aadhar}</p>
+            `
+                : ""
+            }
             <p><strong>Conductor:</strong> ${response.conductorName}</p>
-            <p><strong>Location:</strong> ${response.location.address}</p>
+            <p><strong>Location:</strong> ${response.location?.address || "Unknown"}</p>
             <p><strong>Submitted:</strong> ${response.submittedAt}</p>
             <p><strong>Sync Status:</strong> ${response.syncStatus}</p>
             <h3>Responses:</h3>
-            ${response.responses
+            ${responsesArray
               .map(
                 (r: any, i: number) => `
               <div style="margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
@@ -93,50 +114,75 @@ export function ConductorResponseViewer({ surveyId, surveyTitle, open, onOpenCha
           <TabsContent value="responses" className="space-y-4">
             <ScrollArea className="h-[400px]">
               <div className="space-y-3">
-                {responses.map((response) => (
-                  <Card key={response.id}>
-                    <CardHeader className="pb-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-sm font-medium">Response #{response.id}</CardTitle>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {response.location.address}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {response.submittedAt}
-                            </span>
+                {responses.map((response) => {
+                  const responsesArray = Array.isArray(response.responses)
+                    ? response.responses
+                    : Object.entries(response.responses as any).map(([question, answer]) => ({
+                        question,
+                        answer: Array.isArray(answer) ? answer.join(", ") : String(answer),
+                      }))
+
+                  return (
+                    <Card key={response.id}>
+                      <CardHeader className="pb-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-sm font-medium">Response #{response.id}</CardTitle>
+                            {response.personalInfo && (
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                                <span className="flex items-center gap-1">
+                                  <User className="h-3 w-3" />
+                                  {response.personalInfo.name}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Mail className="h-3 w-3" />
+                                  {response.personalInfo.email}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Phone className="h-3 w-3" />
+                                  {response.personalInfo.mobile}
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                              <span className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {response.location?.address || "Unknown"}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {response.submittedAt}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={response.syncStatus === "synced" ? "default" : "secondary"}>
+                              {response.syncStatus}
+                            </Badge>
+                            <Button size="sm" variant="outline" onClick={() => viewResponseDetails(response)}>
+                              <Eye className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={response.syncStatus === "synced" ? "default" : "secondary"}>
-                            {response.syncStatus}
-                          </Badge>
-                          <Button size="sm" variant="outline" onClick={() => viewResponseDetails(response)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="space-y-2">
+                          {responsesArray.slice(0, 2).map((answer, index) => (
+                            <div key={index} className="text-sm">
+                              <span className="font-medium">Q{index + 1}:</span> {answer.answer.substring(0, 50)}
+                              {answer.answer.length > 50 && "..."}
+                            </div>
+                          ))}
+                          {responsesArray.length > 2 && (
+                            <div className="text-xs text-muted-foreground">
+                              +{responsesArray.length - 2} more answers
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="space-y-2">
-                        {response.responses.slice(0, 2).map((answer, index) => (
-                          <div key={index} className="text-sm">
-                            <span className="font-medium">Q{index + 1}:</span> {answer.answer.substring(0, 50)}
-                            {answer.answer.length > 50 && "..."}
-                          </div>
-                        ))}
-                        {response.responses.length > 2 && (
-                          <div className="text-xs text-muted-foreground">
-                            +{response.responses.length - 2} more answers
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  )
+                })}
                 {responses.length === 0 && (
                   <div className="text-center text-muted-foreground py-8">
                     No responses collected yet for this survey.
@@ -170,7 +216,12 @@ export function ConductorResponseViewer({ surveyId, surveyTitle, open, onOpenCha
                 <CardContent className="p-4">
                   <div className="text-2xl font-bold">
                     {responses.length > 0
-                      ? Math.round(responses.reduce((acc, r) => acc + r.responses.length, 0) / responses.length)
+                      ? Math.round(
+                          responses.reduce((acc, r) => {
+                            const responsesArray = Array.isArray(r.responses) ? r.responses : Object.keys(r.responses)
+                            return acc + responsesArray.length
+                          }, 0) / responses.length,
+                        )
                       : 0}
                   </div>
                   <div className="text-xs text-muted-foreground">Avg Questions/Response</div>

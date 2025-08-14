@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
-import { ArrowLeft, ArrowRight, Send } from "lucide-react"
+import { ArrowLeft, ArrowRight, Send, User } from "lucide-react"
 import { savePublicResponse } from "@/lib/survey-responses"
 
 interface PublicSurveyFormProps {
@@ -17,13 +17,34 @@ interface PublicSurveyFormProps {
   onComplete: () => void
 }
 
+interface PersonalInfo {
+  name: string
+  email: string
+  mobile: string
+  aadhar: string
+}
+
 export function PublicSurveyForm({ survey, onComplete }: PublicSurveyFormProps) {
-  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [currentStep, setCurrentStep] = useState(0) // 0 = personal info, 1+ = questions
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    name: "",
+    email: "",
+    mobile: "",
+    aadhar: "",
+  })
   const [responses, setResponses] = useState<Record<number, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const questions = survey.questions || []
-  const progress = ((currentQuestion + 1) / questions.length) * 100
+  const totalSteps = questions.length + 1 // +1 for personal info step
+  const progress = ((currentStep + 1) / totalSteps) * 100
+
+  const handlePersonalInfoChange = (field: keyof PersonalInfo, value: string) => {
+    setPersonalInfo((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
 
   const handleResponseChange = (questionIndex: number, value: string) => {
     setResponses((prev) => ({
@@ -33,15 +54,19 @@ export function PublicSurveyForm({ survey, onComplete }: PublicSurveyFormProps) 
   }
 
   const handleNext = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1)
+    if (currentStep < totalSteps - 1) {
+      setCurrentStep(currentStep + 1)
     }
   }
 
   const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1)
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1)
     }
+  }
+
+  const isPersonalInfoComplete = () => {
+    return personalInfo.name && personalInfo.email && personalInfo.mobile && personalInfo.aadhar
   }
 
   const handleSubmit = async () => {
@@ -64,11 +89,11 @@ export function PublicSurveyForm({ survey, onComplete }: PublicSurveyFormProps) 
       console.log("Location access denied")
     }
 
-    // Save public response
     const publicResponse = {
       id: `public_${Date.now()}`,
       surveyId: survey.id,
-      conductorName: "Public Participant",
+      conductorName: personalInfo.name,
+      personalInfo, // Add personal information to response
       responses: Object.entries(responses).map(([index, answer]) => ({
         question: questions[Number.parseInt(index)]?.text || "",
         answer,
@@ -100,114 +125,179 @@ export function PublicSurveyForm({ survey, onComplete }: PublicSurveyFormProps) 
     )
   }
 
-  const currentQ = questions[currentQuestion]
-
   return (
     <div className="space-y-6">
       {/* Progress Bar */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm text-gray-600">
-          <span>
-            Question {currentQuestion + 1} of {questions.length}
-          </span>
+          <span>{currentStep === 0 ? "Personal Information" : `Question ${currentStep} of ${questions.length}`}</span>
           <span>{Math.round(progress)}% Complete</span>
         </div>
         <Progress value={progress} className="h-2" />
       </div>
 
-      {/* Question Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Question {currentQuestion + 1}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <Label className="text-base font-medium">{currentQ.text}</Label>
-          </div>
-
-          <div>
-            {currentQ.type === "multiple_choice" && currentQ.options ? (
-              <RadioGroup
-                value={responses[currentQuestion] || ""}
-                onValueChange={(value) => handleResponseChange(currentQuestion, value)}
-              >
-                {currentQ.options.map((option: string, index: number) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <RadioGroupItem value={option} id={`option-${index}`} />
-                    <Label htmlFor={`option-${index}`}>{option}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            ) : currentQ.type === "checkbox" && currentQ.options ? (
+      {/* Personal Information Step */}
+      {currentStep === 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Personal Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                {currentQ.options.map((option: string, index: number) => {
-                  const currentResponses = responses[currentQuestion]?.split(",") || []
-                  const isChecked = currentResponses.includes(option)
-
-                  return (
-                    <div key={index} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`checkbox-${index}`}
-                        checked={isChecked}
-                        onCheckedChange={(checked) => {
-                          const newResponses = currentResponses.filter((r) => r !== option)
-                          if (checked) {
-                            newResponses.push(option)
-                          }
-                          handleResponseChange(currentQuestion, newResponses.join(","))
-                        }}
-                      />
-                      <Label htmlFor={`checkbox-${index}`}>{option}</Label>
-                    </div>
-                  )
-                })}
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  value={personalInfo.name}
+                  onChange={(e) => handlePersonalInfoChange("name", e.target.value)}
+                  placeholder="Enter your full name"
+                  required
+                />
               </div>
-            ) : currentQ.type === "text" ? (
-              <Textarea
-                value={responses[currentQuestion] || ""}
-                onChange={(e) => handleResponseChange(currentQuestion, e.target.value)}
-                placeholder="Enter your response..."
-                rows={4}
-              />
-            ) : (
-              <Input
-                value={responses[currentQuestion] || ""}
-                onChange={(e) => handleResponseChange(currentQuestion, e.target.value)}
-                placeholder="Enter your response..."
-              />
-            )}
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={personalInfo.email}
+                  onChange={(e) => handlePersonalInfoChange("email", e.target.value)}
+                  placeholder="Enter your email address"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="mobile">Mobile Number *</Label>
+                <Input
+                  id="mobile"
+                  type="tel"
+                  value={personalInfo.mobile}
+                  onChange={(e) => handlePersonalInfoChange("mobile", e.target.value)}
+                  placeholder="Enter your mobile number"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="aadhar">Aadhar Number *</Label>
+                <Input
+                  id="aadhar"
+                  value={personalInfo.aadhar}
+                  onChange={(e) => handlePersonalInfoChange("aadhar", e.target.value)}
+                  placeholder="Enter your Aadhar number"
+                  maxLength={12}
+                  required
+                />
+              </div>
+            </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between pt-4">
-            <Button variant="outline" onClick={handlePrevious} disabled={currentQuestion === 0}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Previous
-            </Button>
-
-            {currentQuestion === questions.length - 1 ? (
-              <Button onClick={handleSubmit} disabled={!responses[currentQuestion] || isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Submit Survey
-                  </>
-                )}
-              </Button>
-            ) : (
-              <Button onClick={handleNext} disabled={!responses[currentQuestion]}>
+            <div className="flex justify-between pt-4">
+              <div></div>
+              <Button onClick={handleNext} disabled={!isPersonalInfoComplete()}>
                 Next
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Question Steps */}
+      {currentStep > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Question {currentStep}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <Label className="text-base font-medium">{questions[currentStep - 1].text}</Label>
+            </div>
+
+            <div>
+              {questions[currentStep - 1].type === "multiple_choice" && questions[currentStep - 1].options ? (
+                <RadioGroup
+                  value={responses[currentStep - 1] || ""}
+                  onValueChange={(value) => handleResponseChange(currentStep - 1, value)}
+                >
+                  {questions[currentStep - 1].options.map((option: string, index: number) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <RadioGroupItem value={option} id={`option-${index}`} />
+                      <Label htmlFor={`option-${index}`}>{option}</Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              ) : questions[currentStep - 1].type === "checkbox" && questions[currentStep - 1].options ? (
+                <div className="space-y-2">
+                  {questions[currentStep - 1].options.map((option: string, index: number) => {
+                    const currentResponses = responses[currentStep - 1]?.split(",") || []
+                    const isChecked = currentResponses.includes(option)
+
+                    return (
+                      <div key={index} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`checkbox-${index}`}
+                          checked={isChecked}
+                          onCheckedChange={(checked) => {
+                            const newResponses = currentResponses.filter((r) => r !== option)
+                            if (checked) {
+                              newResponses.push(option)
+                            }
+                            handleResponseChange(currentStep - 1, newResponses.join(","))
+                          }}
+                        />
+                        <Label htmlFor={`checkbox-${index}`}>{option}</Label>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : questions[currentStep - 1].type === "text" ? (
+                <Textarea
+                  value={responses[currentStep - 1] || ""}
+                  onChange={(e) => handleResponseChange(currentStep - 1, e.target.value)}
+                  placeholder="Enter your response..."
+                  rows={4}
+                />
+              ) : (
+                <Input
+                  value={responses[currentStep - 1] || ""}
+                  onChange={(e) => handleResponseChange(currentStep - 1, e.target.value)}
+                  placeholder="Enter your response..."
+                />
+              )}
+            </div>
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-4">
+              <Button variant="outline" onClick={handlePrevious}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+
+              {currentStep === questions.length ? (
+                <Button onClick={handleSubmit} disabled={!responses[currentStep - 1] || isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Submit Survey
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button onClick={handleNext} disabled={!responses[currentStep - 1]}>
+                  Next
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

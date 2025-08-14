@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, BarChart3, Shield, Zap, Users, FileText, MapPin } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
 import { useRouter } from "next/navigation"
@@ -47,9 +48,12 @@ export default function HomePage() {
             <BarChart3 className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold">TakeSurvey</span>
           </div>
-          <Link href="/login">
-            <Button>Sign In</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link href="/login">
+              <Button>Sign In</Button>
+            </Link>
+          </div>
         </nav>
       </header>
 

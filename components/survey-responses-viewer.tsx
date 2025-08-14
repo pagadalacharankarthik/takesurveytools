@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { MapPin, Clock, User, FileText, Download, AlertCircle, Eye } from "lucide-react"
+import { MapPin, Clock, User, FileText, Download, AlertCircle, Eye, Mail, Phone, CreditCard } from "lucide-react"
 import { getSurveyResponses, type SurveyResponse } from "@/lib/survey-responses"
 
 interface SurveyResponsesViewerProps {
@@ -53,14 +53,18 @@ export function SurveyResponsesViewer({ surveyId, surveyTitle, open, onOpenChang
           const conductor = response.conductorName || "Unknown"
           const submittedDate = new Date(response.submittedAt).toLocaleDateString()
           const answersCount = Array.isArray(response.responses) ? response.responses.length : 0
+          const personalInfo = response.personalInfo
 
-          return `"${response.id}","${conductor}","${location}","${submittedDate}","${answersCount}"`
+          return `"${response.id}","${personalInfo?.name || "N/A"}","${personalInfo?.email || "N/A"}","${personalInfo?.mobile || "N/A"}","${personalInfo?.aadhar || "N/A"}","${conductor}","${location}","${submittedDate}","${answersCount}"`
         })
         .join("\n")
 
-      const blob = new Blob([`ID,Conductor,Location,Submitted,Questions Answered\n${csvContent}`], {
-        type: "text/csv;charset=utf-8;",
-      })
+      const blob = new Blob(
+        [`ID,Name,Email,Mobile,Aadhar,Conductor,Location,Submitted,Questions Answered\n${csvContent}`],
+        {
+          type: "text/csv;charset=utf-8;",
+        },
+      )
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
       a.href = url
@@ -154,11 +158,27 @@ export function SurveyResponsesViewer({ surveyId, surveyTitle, open, onOpenChang
                                   <CardTitle className="text-sm font-medium">
                                     Response #{response.id.slice(-8)}
                                   </CardTitle>
+                                  {response.personalInfo && (
+                                    <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                                      <span className="flex items-center gap-1">
+                                        <User className="h-3 w-3" />
+                                        {response.personalInfo.name}
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        <Mail className="h-3 w-3" />
+                                        {response.personalInfo.email}
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        <Phone className="h-3 w-3" />
+                                        {response.personalInfo.mobile}
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        <CreditCard className="h-3 w-3" />
+                                        {response.personalInfo.aadhar}
+                                      </span>
+                                    </div>
+                                  )}
                                   <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                                    <span className="flex items-center gap-1">
-                                      <User className="h-3 w-3" />
-                                      {response.conductorName || "Unknown Conductor"}
-                                    </span>
                                     <span className="flex items-center gap-1">
                                       <MapPin className="h-3 w-3" />
                                       {response.location?.address || "Location not recorded"}
@@ -268,7 +288,6 @@ export function SurveyResponsesViewer({ surveyId, surveyTitle, open, onOpenChang
           {selectedResponse && (
             <ScrollArea className="h-[500px]">
               <div className="space-y-4">
-                {/* Response Metadata */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-sm">Response Information</CardTitle>
@@ -277,6 +296,22 @@ export function SurveyResponsesViewer({ surveyId, surveyTitle, open, onOpenChang
                     <div>
                       <strong>ID:</strong> {selectedResponse.id}
                     </div>
+                    {selectedResponse.personalInfo && (
+                      <>
+                        <div>
+                          <strong>Name:</strong> {selectedResponse.personalInfo.name}
+                        </div>
+                        <div>
+                          <strong>Email:</strong> {selectedResponse.personalInfo.email}
+                        </div>
+                        <div>
+                          <strong>Mobile:</strong> {selectedResponse.personalInfo.mobile}
+                        </div>
+                        <div>
+                          <strong>Aadhar:</strong> {selectedResponse.personalInfo.aadhar}
+                        </div>
+                      </>
+                    )}
                     <div>
                       <strong>Conductor:</strong> {selectedResponse.conductorName || "Unknown"}
                     </div>
