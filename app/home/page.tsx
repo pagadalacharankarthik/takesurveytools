@@ -86,7 +86,7 @@ export default function HomePage() {
                     href="https://drive.google.com/file/d/1L_UiJOJenrOyShaGyMKUBiC1krw9dgUJ/view?usp=drivesdk" 
                     target="_blank"
                     rel="noopener noreferrer">
-                View Demo
+                Demo
             </Button>
 
           </div>
