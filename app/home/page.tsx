@@ -78,16 +78,21 @@ export default function HomePage() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full sm:w-auto bg-transparent"
-                    as="a" 
-                    href="https://drive.google.com/file/d/1L_UiJOJenrOyShaGyMKUBiC1krw9dgUJ/view?usp=drivesdk" 
-                    target="_blank"
-                    rel="noopener noreferrer">
-                View Demo
-            </Button>
+            <a
+  href="https://drive.google.com/file/d/1L_UiJOJenrOyShaGyMKUBiC1krw9dgUJ/view?usp=drivesdk"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="w-full sm:w-auto"
+>
+  <Button
+    size="lg"
+    variant="outline"
+    className="w-full sm:w-auto bg-transparent"
+  >
+    View Demo
+  </Button>
+</a>
+
 
           </div>
         </div>
