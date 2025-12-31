@@ -224,7 +224,7 @@ export default function HomePage() {
             <BarChart3 className="h-6 w-6 text-primary" />
             <span className="font-bold">TakeSurvey</span>
           </div>
-          <p className="text-sm text-muted-foreground">© 2024 TakeSurvey. AI-Powered Survey Platform.</p>
+          <p className="text-sm text-muted-foreground">© 2024 TakeSurvey. AI-Powered Survey Platform, Created by Pagadala Charan Karthik.</p>
         </div>
       </footer>
     </div>
