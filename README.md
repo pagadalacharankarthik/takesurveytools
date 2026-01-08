@@ -247,19 +247,19 @@ bun install
 
 ## 📂 Project Structure
 
-app/              # Application routes  
-conductor/        # Survey Conductor dashboard  
-home/             # Landing page  
-login/            # Authentication  
-org-admin/        # Organization Admin panel  
-super-admin/      # Super Admin panel  
-risk-monitoring/  # Risk and integrity features  
-survey/           # Survey execution  
-components/       # Reusable UI  
-hooks/            # Custom hooks  
-lib/              # Utilities  
-public/           # Assets  
-styles/           # Global styles  
+- app/              # Application routes  
+- conductor/        # Survey Conductor dashboard  
+- home/             # Landing page  
+- login/            # Authentication  
+- org-admin/        # Organization Admin panel  
+- super-admin/      # Super Admin panel  
+- risk-monitoring/  # Risk and integrity features  
+- survey/           # Survey execution  
+- components/       # Reusable UI  
+- hooks/            # Custom hooks  
+- lib/              # Utilities  
+- public/           # Assets  
+- styles/           # Global styles  
 
 ---
 
